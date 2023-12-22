@@ -34,6 +34,7 @@ var kernel = builder.Build();
 
 // Add the Bing Custom Search plugin
 kernel.ImportPluginFromObject(new WebSearchEnginePlugin(bingSubscriptionKey, bingCustomConfigId), "bing");
+kernel.ImportPluginFromObject(new LeavePlugin(), "leave");
 
 // Create chat history
 ChatHistory history = [];
@@ -50,7 +51,7 @@ while (true)
     history.AddUserMessage(Console.ReadLine()!);
 
     // Enable auto function calling
-    OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+    OpenAIPromptExecutionSettings settings = new()
     {
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
     };
@@ -58,7 +59,7 @@ while (true)
     // Get the response from the AI
     var result = chatCompletionService.GetStreamingChatMessageContentsAsync(
         history,
-        executionSettings: openAIPromptExecutionSettings,
+        executionSettings: settings,
         kernel: kernel);
 
 
