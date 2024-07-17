@@ -1,11 +1,11 @@
-﻿using Azure.Identity;
-using FunctionCalling.Plugins;
+﻿using FunctionCalling.Plugins;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Plugins.Core;
 
 // Before running this sample, you must add the following secrets to the project via SecretManager:
 // - AzureOpenAI:DeploymentName
@@ -25,18 +25,26 @@ var deploymentName = configuration["AzureOpenAI:DeploymentName"];
 var endpoint = configuration["AzureOpenAI:Endpoint"];
 var bingSubscriptionKey = configuration["BingCustomSearch:SubscriptionKey"];
 var bingCustomConfigId = configuration["BingCustomSearch:CustomConfigId"];
+var openAIKey = configuration["OpenAI:ApiKey"];
+var sqlConnectionString = configuration["SQL:ConnectionString"];
 
 // Create the kernel and configure it
 var builder = Kernel.CreateBuilder();
-builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, new DefaultAzureCredential());
+//builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, new DefaultAzureCredential());
+builder.AddOpenAIChatCompletion("gpt-4o", openAIKey);
 builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
 var kernel = builder.Build();
 
 // Add the Bing Custom Search plugin
 kernel.ImportPluginFromObject(new WebSearchEnginePlugin(bingSubscriptionKey, bingCustomConfigId), "bing");
+// Add the Leave plugin
 kernel.ImportPluginFromObject(new LeavePlugin(), "leave");
+// Add the SQL plugin
+kernel.ImportPluginFromObject(new SQLPlugin(sqlConnectionString), "sql");
+#pragma warning disable SKEXP0050
+kernel.ImportPluginFromType<TimePlugin>();
+#pragma warning restore SKEXP0050 
 
-// Create chat history
 ChatHistory history = [];
 
 // Get chat completion service
@@ -63,7 +71,7 @@ while (true)
         kernel: kernel);
 
 
-    Console.ForegroundColor = ConsoleColor.Blue;
+    Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine();
 
     // Stream the results
@@ -79,6 +87,7 @@ while (true)
         Console.Write(content.Content);
         fullMessage += content.Content;
     }
+    //AnsiConsole.MarkupLine(fullMessage);
     Console.WriteLine();
     Console.WriteLine();
 
