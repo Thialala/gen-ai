@@ -31,12 +31,7 @@ var sqlConnectionString = configuration["SQL:ConnectionString"];
 // Create the kernel and configure it
 var builder = Kernel.CreateBuilder();
 //builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, new DefaultAzureCredential());
-//builder.AddOpenAIChatCompletion("gpt-4o", openAIKey);
-var aiEndpoint = new Uri("https://Meta-Llama-3-70B-Instruct-sgwjq.swedencentral.models.ai.azure.com/v1/chat/completions");
-#pragma warning disable SKEXP0010 // Le type est utilisé à des fins d’évaluation uniquement et est susceptible d’être modifié ou supprimé dans les futures mises à jour. Supprimez ce diagnostic pour continuer.
-builder.AddOpenAIChatCompletion("llama-3", aiEndpoint, "x0winCGjG18YQktwBkZ90bipczotPhTG");
-//builder.AddMistralChatCompletion("llama-3", "gGNNs1nLrD5ZVzgGJlG1UZcggXH8fXS6", aiEndpoint);
-#pragma warning restore SKEXP0010 // Le type est utilisé à des fins d’évaluation uniquement et est susceptible d’être modifié ou supprimé dans les futures mises à jour. Supprimez ce diagnostic pour continuer.
+builder.AddOpenAIChatCompletion("gpt-4o", openAIKey);
 builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
 var kernel = builder.Build();
 
